@@ -1,0 +1,4 @@
+//Permet de ne pas envoyer les données sur GIT
+
+/vendor/
+composer.lock

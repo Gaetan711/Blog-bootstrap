@@ -1,3 +1,44 @@
+<?php
+
+//Connexion à la base de donnée
+require_once 'connexion.php';
+
+//Chargement des dependances Composer
+require_once 'vendor/autoload.php';
+
+// Nettoyer la variable id car elle passe par une url, cela évite de se faire manipuler la requette
+$id = htmlspecialchars(strip_tags($_GET['id']));
+
+//Passe la requête SQL
+$query = $db->prepare('SELECT posts.id, posts.title, posts.content, posts.cover, posts.create_at,  posts.category_id, categories.name  AS category, users.last_name, users.first_name FROM posts INNER JOIN categories ON categories.id = posts.category_id INNER JOIN users ON users.id =posts.user_id WHERE posts.id = :id ORDER BY posts.create_at DESC');
+
+
+//Chargement des dépendances 
+
+$query->bindValue(':id', $id, PDO::PARAM_INT);
+$query->execute();
+
+// Ensuite on récupere l'élément fetch (car on appel que l'id et pas plusieurs infos, sinon on utiliserait fetchAll)
+
+$article = $query->fetch();
+
+
+dump($article);
+//PAGE INTROUVABLE ERREUR 404
+
+if (!$article) {
+    header('Location: 404.php');
+
+}
+ 
+
+
+/* if (isset($_GET $index['id','cover'])) {
+    echo $_GET['prenom'];
+} */
+
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -43,16 +84,24 @@
         <div class="container">
             <div class="row">
                 <div class="col-12">
-                    <h1 class="text-center pt-4">Titre de l'article</h1>
+                    <?php
+                     $originalDate = "{$article['create_at']}";
+                     //Mettre une date du format anglais à fr
+                     $DateTime = DateTime::createFromFormat('Y-m-d', $originalDate);
+                     $newDate = $DateTime->format('m F Y');
+                    ?>
+                    <h1 class="text-center pt-4"><?php echo"{$article['title']}"?></h1>
                 </div>
                     <div class="row">
                         
-                        <div class="col-6 text-end pt-2"><p class="text-secondary">December 16, 21</p></div>
-                        <div class="col-6 text-start pt-2"><a href="#" class="badge bg-dark">Design</a>
-                            <a href="#" class="badge bg-dark">photography</a></div>
+
+                        <div class="col-6 text-end pt-2"><p class="text-secondary"></p></div>
+                        <div class="col-6 text-start pt-2 mb-3"><?php echo"$newDate"?>
+                        <a href="categoriesfiltrees.php?id=<?php echo $article['id'] ?>" class="badge bg-dark"><?php echo"{$article['category']}"?></a>
+                            <a href="#" class="badge bg-dark "></a></div>
                     </div>
                         <div class="col-12 text-center">
-                            <img src="ban.jpg" alt="article picture" class="rounded w-50">
+                            <img src=<?php echo"img/upload/{$article['cover']}"?> alt="article picture" class="rounded w-50">
                         </div>
                             <div class="col-3"></div>
                             
@@ -66,21 +115,17 @@
                                 
                                 <div class="col-3">
 
+                                
                                 </div>
                                 
-                                <div class="col-6 "><p class="text-align">Lorem ipsum dolor sit amet consectetur adipisicing elit. Quos maxime quas aliquam quidem distinctio fugit dignissimos, ea, veritatis natus fugiat vitae a ipsam nostrum iusto, in dolor ad architecto reprehenderit.
-                                     Lorem, ipsum dolor sit amet consectetur adipisicing elit. Tempora at fugiat, eveniet aperiam veniam sunt minima ut quia voluptates debitis sapiente.
-                                      Harum natus quos itaque corrupti, incidunt facere voluptatibus accusamus Lorem ipsum dolor sit amet consectetur adipisicing elit. Quos maxime quas aliquam quidem distinctio fugit dignissimos, ea, veritatis natus fugiat vitae a ipsam nostrum iusto, in dolor ad architecto reprehenderit.
-                                      Lorem, ipsum dolor sit amet consectetur adipisicing elit. Tempora at fugiat, eveniet aperiam veniam sunt minima ut quia voluptates debitis sapiente.
-                                       Harum natus quos itaque corrupti, incidunt facere voluptatibus accusamusLorem ipsum dolor sit amet consectetur adipisicing elit. Quos maxime quas aliquam quidem distinctio fugit dignissimos, ea, veritatis natus fugiat vitae a ipsam nostrum iusto, in dolor ad architecto reprehenderit.
-                                       Lorem, ipsum dolor sit amet consectetur adipisicing elit. Tempora at fugiat, eveniet aperiam veniam sunt minima ut quia voluptates debitis sapiente.
-                                        Harum natus quos itaque corrupti, incidunt facere voluptatibus accusamusLorem ipsum dolor sit amet consectetur adipisicing elit. Quos maxime quas aliquam quidem distinctio fugit dignissimos, ea, veritatis natus fugiat vitae a ipsam nostrum iusto, in dolor ad architecto reprehenderit.
-                                        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Tempora at fugiat, eveniet aperiam veniam sunt minima ut quia voluptates debitis sapiente.
-                                         Harum natus quos itaque corrupti, incidunt facere voluptatibus accusamusLorem ipsum dolor sit amet consectetur adipisicing elit. Quos maxime quas aliquam quidem distinctio fugit dignissimos, ea, veritatis natus fugiat vitae a ipsam nostrum iusto, in dolor ad architecto reprehenderit.
-                                         Lorem, ipsum dolor sit amet consectetur adipisicing elit. Tempora at fugiat, eveniet aperiam veniam sunt minima ut quia voluptates debitis sapiente.
-                                          Harum natus quos itaque corrupti, incidunt facere voluptatibus accusamus.</p>
+                                <div class="col-6 "><p class="text-align"><?php echo"{$article['content']}"?></p>
+                                <p><?php echo"Auteur de l'article : {$article['last_name']}"?></p>
                                 </div>
-                                
+
+                                <?php
+
+                                ?> 
+
                                 <div class="col-3">
 
                                 </div >
